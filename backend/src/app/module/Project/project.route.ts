@@ -8,11 +8,13 @@ router.get('/',
     ProjectController.getAllProject
 );
 
-
 router.post('/',
     ProjectController.createProject
 );
 
+router.delete('/:id',
+    ProjectController.deleteProject
+);
 
 
 export const projectRoutes = router;

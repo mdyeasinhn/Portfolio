@@ -27,8 +27,21 @@ const getAllProject = catchAsync(async (req: Request, res: Response, next: NextF
         data: result
     })
 });
+//-------------Get all Project  ------------------
+const deleteProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const result = await ProjectService.deleteProject(id);
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Project deleted successfull!",
+        data: result
+    })
+});
 
 export const ProjectController = {
     createProject,
-    getAllProject
+    getAllProject,
+    deleteProject
 }
