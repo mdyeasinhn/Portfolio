@@ -16,6 +16,7 @@ const createProject = catchAsync(async (req: Request, res: Response, next: NextF
         data: result
     })
 });
+
 //-------------Get all Project  ------------------
 const getAllProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const result = await ProjectService.getAllProject();
@@ -27,7 +28,20 @@ const getAllProject = catchAsync(async (req: Request, res: Response, next: NextF
         data: result
     })
 });
+
 //-------------Get all Project  ------------------
+const updateProjectByID = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const result = await ProjectService.updateProjectByID(id, req.body);
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Project updated successfull!",
+        data: result
+    })
+});
+//-------------Delete a Project  ------------------
 const deleteProject = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const result = await ProjectService.deleteProject(id);
@@ -43,5 +57,6 @@ const deleteProject = catchAsync(async (req: Request, res: Response, next: NextF
 export const ProjectController = {
     createProject,
     getAllProject,
-    deleteProject
+    deleteProject,
+    updateProjectByID
 }

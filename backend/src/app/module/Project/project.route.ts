@@ -11,6 +11,9 @@ router.get('/',
 router.post('/',
     ProjectController.createProject
 );
+router.patch('/:id',
+    ProjectController.updateProjectByID
+);
 
 router.delete('/:id',
     ProjectController.deleteProject
