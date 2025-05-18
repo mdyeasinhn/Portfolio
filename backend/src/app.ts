@@ -1,7 +1,10 @@
-import express, { Application, Request, Response } from 'express'
+import express, { Application, NextFunction, Request, Response } from 'express'
 import cors from 'cors'
 const app: Application = express()
 import cookieParser from 'cookie-parser'
+import router from './app/routes'
+import { StatusCodes } from 'http-status-codes'
+import globalErrorHandler from './app/middleware/globalErrorHandler'
 
 app.use(cors())
 app.use(cookieParser())
@@ -15,6 +18,25 @@ app.get('/', (req: Request, res: Response) => {
     status: true,
     message: 'Server Live ⚡',
   })
+});
+
+
+// Application routes
+app.use('/api/v1', router);
+
+
+app.use( (req: Request, res: Response, next : NextFunction) => {
+    res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Route not found',
+        error : {
+            path : req.originalUrl,
+            message : "Your requested method is not found"
+        }
+    })
 })
 
-export default app
+// Global Error Handler
+app.use(globalErrorHandler);
+
+export default app;

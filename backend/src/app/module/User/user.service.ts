@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 
 
 const createUserIntoDB = async (email: string, password: string) => {
-    const hashedPassword = await bcrypt.hash(password, config.bcrypt_salt_rounds as string);
+    const hashedPassword = await bcrypt.hash(password, config.bcrypt_salt_rounds as number);
 
     const newUser = await User.create({
         email,
