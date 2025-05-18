@@ -10,7 +10,12 @@ const projectSchema = new Schema({
         type: String,
         required: true,
     },
+
     image: {
+        type: String,
+        required: true,
+    },
+    category: {
         type: String,
         required: true,
     },
@@ -26,13 +31,10 @@ const projectSchema = new Schema({
         type: String,
         required: true,
     },
-    category: {
-        type: String,
-        required: true,
-    },
+
 }, { timestamps: true });
 
 
-const Project = mongoose.model<TProject>('Content', projectSchema);
+const Project = mongoose.model<TProject>('projects', projectSchema);
 
 export default Project;
