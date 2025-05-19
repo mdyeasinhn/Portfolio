@@ -8,6 +8,29 @@ const createBlog = async (data: IBlog) => {
 }
 
 
+//-------------Get all blog  ------------------
+const getAllBlog = async () => {
+    const result = await Blog.find({})
+    return result;
+};
+
+//-------------Update blog  ------------------
+const updateBlogByID = async (blogId: string, data: IBlog) => {
+    const result = await Blog.updateOne(
+        { _id: blogId },
+        data,
+      
+    );
+    return result
+};
+
+const deleteBlog = async (id: string) => {
+    const results = await Blog.deleteOne({ _id: id })
+    return results;
+};
 export const BlogService = {
-    createBlog
+    createBlog,
+    getAllBlog,
+    updateBlogByID,
+    deleteBlog
 }

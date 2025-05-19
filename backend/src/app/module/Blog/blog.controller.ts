@@ -5,7 +5,7 @@ import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 
 
-//-------------Create Project  ------------------
+//-------------Create Blog  ------------------
 const createBlog = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const data = req.body;
     const result = await BlogService.createBlog(data);
@@ -17,7 +17,46 @@ const createBlog = catchAsync(async (req: Request, res: Response, next: NextFunc
         data: result
     })
 });
+//-------------Get all Blog  ------------------
+const getAllBlog = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const result = await BlogService.getAllBlog();
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Blogs retrieved successfully!",
+        data: result
+    })
+});
+//-------------update Blog  ------------------
+const updateBlog = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {id} = req.params;
+    const result = await BlogService.updateBlogByID(id, req.body);
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Blog updated successfully!",
+        data: result
+    })
+});
+//-------------Delete Blog  ------------------
+const deleteBlog = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {id} = req.params;
+    const result = await BlogService.deleteBlog(id);
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: "Blog deleted successfully!",
+        data: result
+    })
+});
 
 export const BlogController = {
-    createBlog
+    createBlog,
+    getAllBlog,
+    updateBlog,
+    deleteBlog
 }

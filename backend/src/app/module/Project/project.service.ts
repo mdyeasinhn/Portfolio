@@ -6,16 +6,16 @@ const createProject = async (data: TProject) => {
     const result = await Project.create(data)
     return result;
 }
-//-------------Get all Project  ------------------
 
+//-------------Get all Project  ------------------
 const getAllProject = async () => {
     const result = await Project.find({})
     return result;
 };
 
-const updateProjectByID = async (userId: string, data: TProject) => {
+const updateProjectByID = async (projectId: string, data: TProject) => {
     const result = await Project.updateOne(
-        { _id: userId },
+        { _id: projectId },
         data,
       
     );
