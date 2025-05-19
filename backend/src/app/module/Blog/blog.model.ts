@@ -23,4 +23,4 @@ const BlogSchema = new Schema<IBlog>({
         timestamps: true
     });
 
-export const Blogs = mongoose.model<IBlog>("Blog", BlogSchema);
+export const Blog = mongoose.model<IBlog>("Blog", BlogSchema);
