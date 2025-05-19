@@ -3,6 +3,9 @@ import { ContactController } from './contact.controller';
 
 const router = express.Router();
 
+router.get('/',
+    ContactController.getAllContacts
+);
 router.post('/',
     ContactController.createContact
 );

@@ -17,7 +17,9 @@ const updateProjectByID = async (projectId: string, data: TProject) => {
     const result = await Project.updateOne(
         { _id: projectId },
         data,
-      
+        {
+            new: true,
+        }
     );
     return result
 };

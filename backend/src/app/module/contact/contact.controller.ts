@@ -17,6 +17,18 @@ const createContact = catchAsync(async (req: Request, res: Response, next: NextF
     })
 });
 
+const getAllContacts = catchAsync(async (req, res) => {
+    const result = await ContactService.getAllContact()
+
+    sendResponse(res, {
+        statusCode: StatusCodes.OK,
+        success: true,
+        message: 'All Messages Getting Successfull',
+        data: result,
+    })
+})
+
 export const ContactController = {
-    createContact
+    createContact,
+    getAllContacts
 }
