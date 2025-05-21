@@ -7,6 +7,9 @@ const router = express.Router();
 router.get('/',
     ProjectController.getAllProject
 );
+router.get('/:id',
+    ProjectController.getSingleProjectByID
+);
 
 router.post('/',
     ProjectController.createProject

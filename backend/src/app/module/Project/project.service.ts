@@ -13,6 +13,11 @@ const getAllProject = async () => {
     return result;
 };
 
+const getSingleProjectByID = async (projectId: string) => {
+  const project = await Project.findById(projectId);
+  return project;
+};
+
 const updateProjectByID = async (projectId: string, data: TProject) => {
     const result = await Project.updateOne(
         { _id: projectId },
@@ -33,5 +38,6 @@ export const ProjectService = {
     createProject,
     getAllProject,
     deleteProject,
-    updateProjectByID
+    updateProjectByID,
+    getSingleProjectByID
 }
