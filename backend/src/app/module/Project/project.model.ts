@@ -4,33 +4,47 @@ import { TProject } from './project.interface';
 const projectSchema = new Schema({
     title: {
         type: String,
-        required: true,
+        required: [true, 'Title is required'],
+        trim: true,
+        maxlength: [100, 'Title cannot exceed 100 characters']
     },
     content: {
         type: String,
-        required: true,
+        required: [true, 'Description is required'],
+        trim: true
     },
-
     image: {
         type: String,
-        required: true,
+        required: [true, 'Image URL is required'],
+        match: [/^https?:\/\/.+\..+$/, 'Please enter a valid image URL']
+    },
+    link: {
+        type: String,
+        match: [/^https?:\/\/.+\..+$/, 'Please enter a valid URL']
+    },
+    github: {
+        type: String,
+        match: [/^https?:\/\/github\.com\/.+$/, 'Please enter a valid GitHub URL']
     },
     category: {
         type: String,
         required: true,
+        enum: ['Full Stack', 'Frontend', 'Backend', 'Mobile', 'Other']
     },
-    frontEndLink: {
-        type: String,
-        required: true,
+    techStack: {
+        type: [String],
+        default: []
     },
-    backEndLink: {
-        type: String,
-        required: true,
+    features: {
+        type: [String],
+        default: []
     },
-    liveLink: {
-        type: String,
-        required: true,
-    },
+    challenges: String,
+    solutions: String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 
 }, { timestamps: true });
 
