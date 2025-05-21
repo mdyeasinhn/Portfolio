@@ -14,12 +14,17 @@ const getAllBlog = async () => {
     return result;
 };
 
+//-------------Get single blog  ------------------
+const getSingleBlogByID = async (id: string) => {
+  const blog = await Blog.findById(id);
+  return blog;
+};
+
 //-------------Update blog  ------------------
 const updateBlogByID = async (blogId: string, data: IBlog) => {
     const result = await Blog.updateOne(
         { _id: blogId },
         data,
-      
     );
     return result
 };
@@ -32,5 +37,6 @@ export const BlogService = {
     createBlog,
     getAllBlog,
     updateBlogByID,
-    deleteBlog
+    deleteBlog,
+    getSingleBlogByID
 }
