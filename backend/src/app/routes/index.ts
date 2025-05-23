@@ -3,6 +3,7 @@ import { userRoutes } from '../module/User/user.route';
 import { projectRoutes } from '../module/Project/project.route';
 import { blogRoutes } from '../module/Blog/blog.route';
 import { contactRoutes } from '../module/contact/contact.route';
+import { statsRoutes } from '../module/Stats/route';
 
 
 const router = Router();
@@ -23,6 +24,10 @@ const moduleRoutes = [
   {
     path: '/contacts',
     route: contactRoutes,
+  },
+  {
+    path: '/stats',
+    route: statsRoutes,
   },
 ];
 

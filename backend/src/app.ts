@@ -6,7 +6,10 @@ import router from './app/routes'
 import { StatusCodes } from 'http-status-codes'
 import globalErrorHandler from './app/middleware/globalErrorHandler'
 
-app.use(cors())
+app.use(cors({
+  origin: ["http://localhost:3000"],
+  credentials: true
+}));
 app.use(cookieParser())
 
 // parser
