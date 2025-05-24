@@ -2,36 +2,30 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-
-
 const BlogForm = () => {
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
+    description: "", // Changed from 'content' to match backend
     author: "",
     category: "",
     image: null as File | null,
   });
 
   const [uploading, setUploading] = useState(false);
+  const router = useRouter();
 
-  const routes = useRouter();
-
-  // Handle input change
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle file selection
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) => ({ ...prev, image: file }));
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -64,39 +58,30 @@ const BlogForm = () => {
       const imgData = await imageResponse.json();
       const imageUrl = imgData.secure_url;
 
-      const data = {
+      // Prepare data matching backend structure
+      const blogData = {
         title: formData.title,
-        content: formData.content,
+        description: formData.description,
         author: formData.author,
         category: formData.category,
         image: imageUrl,
       };
 
-      // Send form data to backend
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs`, {
+      // Send to backend
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/blogs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(blogData),
       });
-
 
       if (!res.ok) {
         throw new Error("Failed to create blog");
       }
 
       alert("Blog added successfully!");
-      setTimeout(() => {
-        setFormData({
-          title: "",
-          content: "",
-          author: "",
-          category: "",
-          image: null,
-        });
-        routes.push("/dashboard/all-blogs");
-      }, 1000);
+      router.push("/dashboard/all-blogs");
     } catch (error) {
-      console.error(error);
+      console.error("Error:", error);
       alert("Something went wrong!");
     } finally {
       setUploading(false);
@@ -113,77 +98,91 @@ const BlogForm = () => {
           Create New Blog
         </h2>
 
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Blog Title"
-          className="w-full mb-3 p-2 border rounded"
-          required
-        />
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Blog Title"
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
 
-        <input
-          type="text"
-          name="content"
-          value={formData.content}
-          onChange={handleChange}
-          placeholder="Blog Content"
-          className="w-full mb-3 p-2 border rounded"
-          required
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Blog Description"
+              className="w-full p-2 border rounded min-h-[100px]"
+              required
+            />
+          </div>
 
-        {/* Category Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 uppercase mb-1">
-            Category
-          </label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            className="w-full p-2 border rounded"
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Author
+            </label>
+            <input
+              type="text"
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              placeholder="Author Name"
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full p-2 border rounded"
+              required
+            >
+              <option value="">Select a category</option>
+              <option value="Technology">Technology</option>
+              <option value="Health">Health</option>
+              <option value="Lifestyle">Lifestyle</option>
+              <option value="Business">Business</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Blog Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={uploading}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
           >
-            <option value="">Select a category</option>
-            <option value="Technology">Technology</option>
-            <option value="Health">Health</option>
-            <option value="Lifestyle">Lifestyle</option>
-            <option value="Business">Business</option>
-          </select>
+            {uploading ? "Uploading..." : "Create Blog"}
+          </button>
         </div>
-
-        {/* Image Upload */}
-        <div className="mt-3">
-          <label className="block text-sm font-medium text-gray-700 uppercase mb-1">
-            Upload Image
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-
-        <input
-          type="text"
-          name="author"
-          value={formData.author}
-          onChange={handleChange}
-          placeholder="Author"
-          className="w-full mb-3 p-2 border rounded mt-2"
-          required
-        />
-
-        <button
-          type="submit"
-          className="w-full px-5 py-3 text-base font-medium text-center text-indigo-100 border border-indigo-500 rounded-lg shadow-sm cursor-pointer hover:text-white bg-gradient-to-br from-purple-500 via-indigo-500 to-indigo-500"
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Add Blog"}
-        </button>
       </form>
     </div>
   );

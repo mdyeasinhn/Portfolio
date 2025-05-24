@@ -24,14 +24,14 @@ const DashboardPage = () => {
   useEffect(() => {
     const init = async () => {
       const decodedToken = (await getCurrentUser()) as CustomJwtPayload;
-      console.log("Decoded token:", decodedToken);
+      // console.log("Decoded token:", decodedToken);
 
       if (decodedToken?.id) {
         setTokenInfo(decodedToken);
 
         try {
           const res = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/${decodedToken.id}`
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${decodedToken.id}`
           );
           const data = await res.json();
           console.log("User API response:", data);

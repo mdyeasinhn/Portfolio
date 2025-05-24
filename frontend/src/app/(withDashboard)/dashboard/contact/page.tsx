@@ -25,7 +25,8 @@ const Contact = () => {
   const fetchContacts = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/contacts`);
+      console.log("response0000",res)
       if (!res.ok) throw new Error("Failed to fetch contacts");
 
       const data = await res.json();
@@ -46,7 +47,7 @@ const Contact = () => {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/contact/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/contacts/${id}`,
         {
           method: "DELETE",
         }

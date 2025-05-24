@@ -15,7 +15,7 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
-    routes.push("/login");
+    routes.push("/");
   };
 
   return (

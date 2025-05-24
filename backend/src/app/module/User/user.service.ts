@@ -45,8 +45,17 @@ const loginUser = async (email: string, password: string) => {
   };
 };
 
+const getSingleUser = async (id: string) => {
+  const user = await User.findById(id).select('-password');
+  if (!user) {
+    throw new ApiError(StatusCodes.NOT_FOUND, 'User not found!');
+  }
+  return user;
+};
+
 
 export const UserService = {
   createUserIntoDB,
   loginUser,
+  getSingleUser
 };

@@ -16,7 +16,7 @@ const AllBlogs: React.FC = () => {
 
   const fetchBlogs = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/blogs`);
       if (!res.ok) throw new Error("Failed to fetch blogs");
 
       const data = await res.json();
@@ -33,7 +33,7 @@ const AllBlogs: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this blog?")) return;
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/blogs/${id}`, {
       method: "DELETE",
     });
 
