@@ -153,17 +153,7 @@ const Login = () => {
           </form>
         </CardContent>
 
-        <CardFooter className="text-center pt-4">
-          <p className="text-white/70 text-sm">
-            Don't have an account?{" "}
-            <Link
-              href="/register"
-              className="text-purple-300 hover:text-purple-100 font-semibold transition-colors hover:underline"
-            >
-              Create one now
-            </Link>
-          </p>
-        </CardFooter>
+              
       </Card>
 
       <style jsx>{`

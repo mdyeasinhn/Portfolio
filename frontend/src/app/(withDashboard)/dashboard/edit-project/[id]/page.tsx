@@ -33,13 +33,13 @@ const EditProject = () => {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`
         );
-        
+
         if (!res.ok) throw new Error("Failed to fetch project");
-        
+
         const { data } = await res.json();
         setExistingData(data);
         reset(data); // Pre-populate form with existing data
-        if (data.image) setImagePreview(data.image);
+        if (data?.image) setImagePreview(data.image);
       } catch (error) {
         console.error("Error fetching project:", error);
         alert("Failed to load project data");
@@ -54,44 +54,43 @@ const EditProject = () => {
 
   // Handle image preview
   useEffect(() => {
-    if (imageFile && imageFile[0]) {
-      const reader = new FileReader();
-      reader.onload = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(imageFile[0]);
+    if (imageFile?.[0]) {
+      const file = imageFile[0];
+      if (file instanceof Blob) {
+        const reader = new FileReader();
+        reader.onload = () => setImagePreview(reader.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        console.warn("Selected image is not a Blob:", file);
+        setImagePreview(existingData?.image || null);
+      }
+    } else {
+      setImagePreview(existingData?.image || null);
     }
-  }, [imageFile]);
+  }, [imageFile, existingData?.image]);
 
   // Handle form submission
   const onSubmit = async (data: TProject) => {
-    if (!isDirty) {
+    if (!isDirty && !data.image?.[0]) {
       alert("No changes detected");
       return;
     }
 
     setLoading(true);
     try {
-      const projectData: Partial<TProject> = { 
-        ...data,
-        // Remove image if not changed (handled separately)
-        image: undefined 
-      };
-
+       const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("content", data.content);
+    formData.append("category", data.category);
+    if (data.github) formData.append("github", data.github);
+    if (data.link) formData.append("link", data.link);
+    if (data.techStack) formData.append("techStack", Array.isArray(data.techStack) ? data.techStack.join(",") : data.techStack || "");
+    formData.append("features", Array.isArray(data.features) ? data.features.join(",") : data.features || "");
       // Handle image upload if new image was selected
       if (data.image && data.image[0]) {
-        const formData = new FormData();
         formData.append("file", data.image[0]);
         formData.append("upload_preset", "Book-sell-shop");
         formData.append("cloud_name", "dvcbclqid");
-
-        const imageRes = await fetch(
-          `https://api.cloudinary.com/v1_1/dvcbclqid/image/upload`,
-          { method: "POST", body: formData }
-        );
-
-        if (!imageRes.ok) throw new Error("Image upload failed");
-        
-        const imgData = await imageRes.json();
-        projectData.image = imgData.secure_url;
       }
 
       // Send updated data to backend
@@ -99,8 +98,7 @@ const EditProject = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`,
         {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(projectData),
+          body: formData, // Send as FormData
         }
       );
 
@@ -136,7 +134,7 @@ const EditProject = () => {
       <h2 className="text-2xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600">
         Edit Project
       </h2>
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Title */}
         <div>
@@ -221,7 +219,7 @@ const EditProject = () => {
           <input
             type="text"
             {...register("techStack")}
-            defaultValue={existingData.techStack?.join(", ")}
+            defaultValue={existingData?.techStack?.join(", ")}
             placeholder="React, Node.js, MongoDB"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
@@ -235,7 +233,7 @@ const EditProject = () => {
           <input
             type="text"
             {...register("features")}
-            defaultValue={existingData.features?.join(", ")}
+            defaultValue={existingData?.features?.join(", ")}
             placeholder="User authentication, Responsive design"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
@@ -260,15 +258,18 @@ const EditProject = () => {
                       const reader = new FileReader();
                       reader.onload = () => setImagePreview(reader.result as string);
                       reader.readAsDataURL(e.target.files[0]);
+                    } else {
+                      // If no file selected, revert to existing image or clear preview
+                      setImagePreview(existingData?.image || null);
                     }
                   }}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
                 {imagePreview && (
                   <div className="mt-3">
-                    <img 
-                      src={imagePreview} 
-                      alt="Preview" 
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
                       className="h-40 object-contain rounded-md border"
                     />
                     <p className="mt-1 text-xs text-gray-500">Image Preview</p>
@@ -290,9 +291,9 @@ const EditProject = () => {
           </button>
           <button
             type="submit"
-            disabled={loading || !isDirty}
+            disabled={loading || (!isDirty && !watch("image")?.[0])}
             className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-              loading || !isDirty ? "opacity-70 cursor-not-allowed" : ""
+              loading || (!isDirty && !watch("image")?.[0]) ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
             {loading ? "Saving..." : "Save Changes"}

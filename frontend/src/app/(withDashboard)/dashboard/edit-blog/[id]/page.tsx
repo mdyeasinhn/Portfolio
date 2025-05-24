@@ -8,8 +8,27 @@ interface BlogFormData {
   title: string;
   content: string;
   author: string;
-  category: string;
+  category: "Technology" | "Health" | "Lifestyle" | "Business" | "Portfolio"; // Ensure consistency with backend
   image?: FileList;
+}
+
+interface BlogData {
+  _id: string;
+  title: string;
+  content: string;
+  author: string;
+  category: "Technology" | "Health" | "Lifestyle" | "Business" | "Portfolio";
+  image: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  message: string;
+  meta: null;
+  data?: BlogData; // Make data optional as the fetch might fail
 }
 
 const EditBlog = () => {
@@ -30,8 +49,14 @@ const EditBlog = () => {
 
     const fetchBlog = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/${id}`);
-        const data = await res.json();
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/blogs/${id}`); // Corrected API endpoint
+        if (!res.ok) {
+          const errorData = await res.json();
+          console.error("Error fetching blog:", errorData);
+          alert(`Failed to fetch blog: ${errorData.message || res.statusText}`);
+          return;
+        }
+        const data: ApiResponse = await res.json();
 
         if (data.data) {
           // Populate form fields with existing blog data
@@ -40,14 +65,19 @@ const EditBlog = () => {
           setValue("author", data.data.author);
           setValue("category", data.data.category);
           setExistingImage(data.data.image); // Store existing image URL
+        } else {
+          console.warn("Blog data not found for ID:", id);
+          alert("Blog not found.");
+          router.push("/dashboard/all-blogs");
         }
       } catch (error) {
         console.error("Error fetching blog:", error);
+        alert("Failed to fetch blog.");
       }
     };
 
     fetchBlog();
-  }, [id, setValue]);
+  }, [id, setValue, router]);
 
   const onSubmit = async (data: BlogFormData) => {
     setLoading(true);
@@ -76,19 +106,22 @@ const EditBlog = () => {
       }
 
       // Send updated data to backend
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/blogs/${id}`, { // Corrected API endpoint
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, image: imageUrl }),
       });
 
-      if (!res.ok) throw new Error("Failed to update blog");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(`Failed to update blog: ${errorData.message || res.statusText}`);
+      }
 
       alert("Blog updated successfully!");
       router.push("/dashboard/all-blogs");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("An error occurred while updating the blog.");
+      alert(error.message || "An error occurred while updating the blog.");
     } finally {
       setLoading(false);
     }
@@ -133,8 +166,8 @@ const EditBlog = () => {
             <option value="Technology">Technology</option>
             <option value="Health">Health</option>
             <option value="Lifestyle">Lifestyle</option>
-            <option value="Portfolio">Portfolio</option>
             <option value="Business">Business</option>
+            <option value="Portfolio">Portfolio</option>
           </select>
         </div>
 
