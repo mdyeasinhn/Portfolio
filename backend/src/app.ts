@@ -7,7 +7,7 @@ import { StatusCodes } from 'http-status-codes'
 import globalErrorHandler from './app/middleware/globalErrorHandler'
 
 app.use(cors({
-  origin: ["https://mdyeasinhn.netlify.app"],
+  origin: ["https://mdyeasinhn.netlify.app", "https://portfolio-eta-beige-69.vercel.app"],
   credentials: true
 }));
 
