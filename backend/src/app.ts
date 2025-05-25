@@ -8,8 +8,8 @@ import globalErrorHandler from './app/middleware/globalErrorHandler'
 
 
 app.use(cors({
-  origin: ["http://localhost:3000", "https://mdyeasinhn.netlify.app", "http://localhost:5173"],
-  credentials: true
+  origin: '*',  // allow all origins
+  credentials: false  // no credentials allowed
 }));
 
 app.use(cookieParser())

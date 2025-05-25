@@ -61,7 +61,7 @@ const DashboardPage = () => {
       <h1 className="text-4xl text-center mt-10">Welcome to the dashboard</h1>
       {user ? (
         <div className="text-center mt-5">
-          <h2 className="text-2xl">Name: {user.name}</h2>
+         
           <h2 className="text-2xl">Email: {user.email}</h2>
           <h2 className="text-2xl">Role: {user.role}</h2>
         </div>
