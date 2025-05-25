@@ -3,11 +3,9 @@ import React, { useEffect, useState } from "react";
 
 interface TContact {
   _id: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
-  phone: number;
-  category: string;
+  phone?: number;
   message: string;
   createdAt: string;
 }
@@ -75,9 +73,6 @@ const Contact = () => {
                     Contact Info
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Category
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Message
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -97,12 +92,12 @@ const Contact = () => {
                       <div className="flex items-start space-x-3">
                         <div className="flex-shrink-0">
                           <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                            {item.firstName.charAt(0).toUpperCase()}{item.lastName.charAt(0).toUpperCase()}
+                            {(item.name || '').split(' ').map(n => n.charAt(0)).join('').toUpperCase().slice(0, 2)}
                           </div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-900">
-                            {item.firstName} {item.lastName}
+                            {item.name}
                           </p>
                           <div className="mt-1 space-y-1">
                             <p className="text-xs text-gray-600 flex items-center">
@@ -112,27 +107,24 @@ const Contact = () => {
                               </svg>
                               {item.email}
                             </p>
-                            <p className="text-xs text-gray-600 flex items-center">
-                              <svg className="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                              </svg>
-                              {item.phone}
-                            </p>
+                            {item.phone && (
+                              <p className="text-xs text-gray-600 flex items-center">
+                                <svg className="w-3 h-3 mr-1 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                </svg>
+                                {item.phone}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
-                        {item.category}
-                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="max-w-xs">
                         <p className="text-sm text-gray-900 line-clamp-3 leading-relaxed">
                           {item.message}
                         </p>
-                        {item.message.length > 100 && (
+                        {item.message && item.message.length > 100 && (
                           <button className="text-xs text-indigo-600 hover:text-indigo-800 mt-1 font-medium">
                             Read more
                           </button>
