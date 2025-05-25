@@ -1,6 +1,6 @@
 "use client";
 //@ts-ignore
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { TProject } from "@/types/projectType";
@@ -24,41 +24,39 @@ const EditProject = () => {
   // Watch image changes for preview
   const imageFile = watch("image");
 
-  // Fetch existing project data
+  const fetchProject = useCallback(async (projectId: string) => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${projectId}`
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch project");
+
+      const { data } = await res.json();
+      setExistingData(data);
+      reset(data); // Pre-populate form with existing data
+      if (data?.image) setImagePreview(data.image);
+    } catch (error) {
+      console.error("Error fetching project:", error);
+      alert("Failed to load project data");
+      router.push("/dashboard/all-project");
+    } finally {
+      setLoading(false);
+    }
+  }, [reset, router]);
+
   useEffect(() => {
-    if (!id) return;
+    if (id) {
+      fetchProject(String(id));
+    }
+  }, [id, fetchProject]);
 
-    const fetchProject = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/projects/${id}`
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch project");
-
-        const { data } = await res.json();
-        setExistingData(data);
-        reset(data); // Pre-populate form with existing data
-        if (data?.image) setImagePreview(data.image);
-      } catch (error) {
-        console.error("Error fetching project:", error);
-        alert("Failed to load project data");
-        router.push("/dashboard/all-project");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProject();
-  }, [id, reset, router]);
-
-  // Handle image preview
-  useEffect(() => {
-    if (imageFile?.[0]) {
-      const file = imageFile[0];
+  const handleImagePreview = useCallback((files: FileList | null) => {
+    if (files?.[0]) {
+      const file = files[0];
       //@ts-ignore
-      if (file instanceof Blob) {
+      if (typeof Blob !== 'undefined' && file instanceof Blob) {
         const reader = new FileReader();
         reader.onload = () => setImagePreview(reader.result as string);
         reader.readAsDataURL(file);
@@ -69,7 +67,17 @@ const EditProject = () => {
     } else {
       setImagePreview(existingData?.image || null);
     }
-  }, [imageFile, existingData?.image]);
+  }, [existingData?.image]);
+
+  // Handle image preview
+  useEffect(() => {
+    // 'imageFile' from watch might be FileList[] | undefined
+    if (Array.isArray(imageFile) && imageFile.length > 0) {
+      handleImagePreview(imageFile as unknown as FileList);
+    } else if (imageFile === undefined) {
+      handleImagePreview(null);
+    }
+  }, [imageFile, handleImagePreview]);
 
   // Handle form submission
   const onSubmit = async (data: TProject) => {
@@ -80,18 +88,18 @@ const EditProject = () => {
 
     setLoading(true);
     try {
-       const formData = new FormData();
-    formData.append("title", data.title);
-    formData.append("content", data.content);
-    formData.append("category", data.category);
+      const formData = new FormData();
+      formData.append("title", data.title);
+      formData.append("content", data.content);
+      formData.append("category", data.category);
       //@ts-ignore
-    if (data.github) formData.append("github", data.github);
+      if (data.github) formData.append("github", data.github);
       //@ts-ignore
-    if (data.link) formData.append("link", data.link);
+      if (data.link) formData.append("link", data.link);
       //@ts-ignore
-    if (data.techStack) formData.append("techStack", Array.isArray(data.techStack) ? data.techStack.join(",") : data.techStack || "");
+      if (data.techStack) formData.append("techStack", Array.isArray(data.techStack) ? data.techStack.join(",") : data.techStack || "");
       //@ts-ignore
-    formData.append("features", Array.isArray(data.features) ? data.features.join(",") : data.features || "");
+      formData.append("features", Array.isArray(data.features) ? data.features.join(",") : data.features || "");
       // Handle image upload if new image was selected
       if (data.image && data.image[0]) {
         formData.append("file", data.image[0]);
@@ -200,7 +208,7 @@ const EditProject = () => {
           </label>
           <input
             type="url"
-      //@ts-ignore
+            //@ts-ignore
             {...register("github")}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
@@ -213,7 +221,7 @@ const EditProject = () => {
           </label>
           <input
             type="url"
-      //@ts-ignore
+            //@ts-ignore
             {...register("link")}
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
@@ -226,9 +234,9 @@ const EditProject = () => {
           </label>
           <input
             type="text"
-      //@ts-ignore
+            //@ts-ignore
             {...register("techStack")}
-      //@ts-ignore
+            //@ts-ignore
             defaultValue={existingData?.techStack?.join(", ")}
             placeholder="React, Node.js, MongoDB"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -242,10 +250,9 @@ const EditProject = () => {
           </label>
           <input
             type="text"
-      //@ts-ignore
+            //@ts-ignore
             {...register("features")}
-      //@ts-ignore
-
+            //@ts-ignore
             defaultValue={existingData?.features?.join(", ")}
             placeholder="User authentication, Responsive design"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -267,14 +274,7 @@ const EditProject = () => {
                   accept="image/*"
                   onChange={(e) => {
                     field.onChange(e.target.files);
-                    if (e.target.files?.[0]) {
-                      const reader = new FileReader();
-                      reader.onload = () => setImagePreview(reader.result as string);
-                      reader.readAsDataURL(e.target.files[0]);
-                    } else {
-                      // If no file selected, revert to existing image or clear preview
-                      setImagePreview(existingData?.image || null);
-                    }
+                    handleImagePreview(e.target.files);
                   }}
                   className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
                 />
@@ -305,9 +305,8 @@ const EditProject = () => {
           <button
             type="submit"
             disabled={loading || (!isDirty && !watch("image")?.[0])}
-            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-              loading || (!isDirty && !watch("image")?.[0]) ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${loading || (!isDirty && !watch("image")?.[0]) ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>
