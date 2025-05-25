@@ -7,9 +7,13 @@ import { StatusCodes } from 'http-status-codes'
 import globalErrorHandler from './app/middleware/globalErrorHandler'
 
 app.use(cors({
-  origin: ["https://mdyeasinhn.netlify.app", "https://portfolio-eta-beige-69.vercel.app"],
+  origin: ["http://localhost:3000"],
   credentials: true
 }));
+// app.use(cors({
+//   origin: ["https://mdyeasinhn.netlify.app", "https://portfolio-eta-beige-69.vercel.app"],
+//   credentials: true
+// }));
 
 app.use(cookieParser())
 
