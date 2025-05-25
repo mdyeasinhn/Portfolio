@@ -6,10 +6,9 @@ import router from './app/routes'
 import { StatusCodes } from 'http-status-codes'
 import globalErrorHandler from './app/middleware/globalErrorHandler'
 
-
 app.use(cors({
-  origin: '*',  // allow all origins
-  credentials: false  // no credentials allowed
+  origin: ["https://mdyeasinhn.netlify.app"],
+  credentials: true
 }));
 
 app.use(cookieParser())
