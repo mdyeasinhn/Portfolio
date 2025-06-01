@@ -1,11 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import Quill from "quill";
+import "quill/dist/quill.snow.css";
 
 const BlogForm = () => {
   const [formData, setFormData] = useState({
     title: "",
-    description: "", // Changed from 'content' to match backend
+    description: "",
     author: "",
     category: "",
     image: null as File | null,
@@ -13,9 +15,53 @@ const BlogForm = () => {
 
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
+  const quillRef = useRef<HTMLDivElement>(null);
+  const quillInstance = useRef<Quill | null>(null);
+
+  // Initialize Quill editor
+  useEffect(() => {
+    if (quillRef.current && !quillInstance.current) {
+      quillInstance.current = new Quill(quillRef.current, {
+        theme: "snow",
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline", "strike"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["link", "image", "blockquote", "code-block"],
+            [{ align: [] }],
+            [{ color: [] }, { background: [] }],
+            ["clean"],
+          ],
+        },
+        placeholder: "Compose your blog content here...",
+      });
+
+      // Ensure LTR text direction
+      quillRef.current.querySelector(".ql-editor")?.setAttribute("dir", "ltr");
+      quillInstance.current.root.style.direction = "ltr";
+      quillInstance.current.root.style.textAlign = "left";
+
+      // Update formData when Quill content changes
+      quillInstance.current.on("text-change", () => {
+        const content = quillInstance.current?.root.innerHTML || "";
+        setFormData((prev) => ({ ...prev, description: content }));
+      });
+    }
+  }, []);
+
+  // Set Quill content when formData.description changes
+  useEffect(() => {
+    if (quillInstance.current && formData.description) {
+      quillInstance.current.root.innerHTML = formData.description;
+      // Re-apply LTR direction to prevent reversal
+      quillInstance.current.root.style.direction = "ltr";
+      quillInstance.current.root.style.textAlign = "left";
+    }
+  }, [formData.description]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -89,101 +135,95 @@ const BlogForm = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 shadow-lg rounded-lg w-full max-w-lg"
-      >
-        <h2 className="text-2xl font-semibold mb-4 text-center">
-          Create New Blog
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="bg-white rounded-2xl shadow-lg w-full max-w-5xl p-12 border border-gray-200">
+        <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center tracking-tight">
+          Publish a Professional Blog
         </h2>
+        <form onSubmit={handleSubmit} className="space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                Blog Title
+              </label>
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                placeholder="Enter blog title"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition bg-white text-gray-900 placeholder-gray-500 font-medium"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                Author
+              </label>
+              <input
+                type="text"
+                name="author"
+                value={formData.author}
+                onChange={handleChange}
+                placeholder="Author name"
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition bg-white text-gray-900 placeholder-gray-500 font-medium"
+                required
+              />
+            </div>
+          </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Title
-            </label>
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              placeholder="Blog Title"
-              className="w-full p-2 border rounded"
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                Category
+              </label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition bg-white text-gray-900 font-medium"
+                required
+              >
+                <option value="">Select category</option>
+                <option value="Technology">Technology</option>
+                <option value="Health">Health</option>
+                <option value="Lifestyle">Lifestyle</option>
+                <option value="Business">Business</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                Featured Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="w-full p-4 border border-gray-300 rounded-lg file:mr-4 file:py-3 file:px-6 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-white text-gray-900 font-medium"
+                required
+              />
+            </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+            <label className="block text-sm font-semibold text-gray-800 mb-2">
+              Blog Content
             </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Blog Description"
-              className="w-full p-2 border rounded min-h-[100px]"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Author
-            </label>
-            <input
-              type="text"
-              name="author"
-              value={formData.author}
-              onChange={handleChange}
-              placeholder="Author Name"
-              className="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category
-            </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-              required
-            >
-              <option value="">Select a category</option>
-              <option value="Technology">Technology</option>
-              <option value="Health">Health</option>
-              <option value="Lifestyle">Lifestyle</option>
-              <option value="Business">Business</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Blog Image
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="w-full p-2 border rounded"
-              required
+            <div
+              ref={quillRef}
+              className="h-[150px] border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm"
             />
           </div>
 
           <button
             type="submit"
             disabled={uploading}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400"
+            className="w-full py-4 px-8 bg-blue-700 text-white rounded-lg hover:bg-blue-800 disabled:bg-blue-400 disabled:cursor-not-allowed transition font-semibold text-lg tracking-wide"
           >
-            {uploading ? "Uploading..." : "Create Blog"}
+            {uploading ? "Publishing..." : "Publish Blog"}
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 };
