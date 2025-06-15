@@ -1,8 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useState, useRef, useEffect } from "react";
-import Quill from "quill";
-import "quill/dist/quill.snow.css";
+import { Editor } from "@tinymce/tinymce-react";
 
 const BlogForm = () => {
   const [formData, setFormData] = useState({
@@ -15,50 +14,7 @@ const BlogForm = () => {
 
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
-  const quillRef = useRef<HTMLDivElement>(null);
-  const quillInstance = useRef<Quill | null>(null);
-
-  // Initialize Quill editor
-  useEffect(() => {
-    if (quillRef.current && !quillInstance.current) {
-      quillInstance.current = new Quill(quillRef.current, {
-        theme: "snow",
-        modules: {
-          toolbar: [
-            [{ header: [1, 2, 3, false] }],
-            ["bold", "italic", "underline", "strike"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            ["link", "image", "blockquote", "code-block"],
-            [{ align: [] }],
-            [{ color: [] }, { background: [] }],
-            ["clean"],
-          ],
-        },
-        placeholder: "Compose your blog content here...",
-      });
-
-      // Ensure LTR text direction
-      quillRef.current.querySelector(".ql-editor")?.setAttribute("dir", "ltr");
-      quillInstance.current.root.style.direction = "ltr";
-      quillInstance.current.root.style.textAlign = "left";
-
-      // Update formData when Quill content changes
-      quillInstance.current.on("text-change", () => {
-        const content = quillInstance.current?.root.innerHTML || "";
-        setFormData((prev) => ({ ...prev, description: content }));
-      });
-    }
-  }, []);
-
-  // Set Quill content when formData.description changes
-  useEffect(() => {
-    if (quillInstance.current && formData.description) {
-      quillInstance.current.root.innerHTML = formData.description;
-      // Re-apply LTR direction to prevent reversal
-      quillInstance.current.root.style.direction = "ltr";
-      quillInstance.current.root.style.textAlign = "left";
-    }
-  }, [formData.description]);
+  const editorRef = useRef<any>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -209,9 +165,32 @@ const BlogForm = () => {
             <label className="block text-sm font-semibold text-gray-800 mb-2">
               Blog Content
             </label>
-            <div
-              ref={quillRef}
-              className="h-[150px] border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm"
+            <Editor
+              onInit={(evt, editor) => (editorRef.current = editor)}
+              initialValue={formData.description}
+              apiKey={process.env.NEXT_PUBLIC_TINYMCE_API_KEY}
+              init={{
+                height: 300,
+                menubar: false,
+                plugins: [
+                  "advlist autolink lists link image charmap print preview anchor",
+                  "searchreplace visualblocks code fullscreen",
+                  "insertdatetime media table paste code help wordcount",
+                ],
+                toolbar:
+                  "undo redo | formatselect | bold italic underline strikethrough | \
+                  alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | \
+                  link image blockquote code | removeformat",
+                content_style: `
+                  body { font-family: Arial, sans-serif; font-size: 16px; direction: ltr; text-align: left; }
+                  p { margin: 0; }
+                `,
+                directionality: "ltr",
+                placeholder: "Compose your blog content here...",
+              }}
+              onEditorChange={(content) => {
+                setFormData((prev) => ({ ...prev, description: content }));
+              }}
             />
           </div>
 
